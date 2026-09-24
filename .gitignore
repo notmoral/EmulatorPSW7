@@ -1,3 +1,8 @@
+.qtcreator/
+build/
+cmake-build-*/
+.DS_Store
+
 # Prerequisites
 *.d
 
