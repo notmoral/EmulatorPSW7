@@ -1,7 +1,8 @@
 #include "TcpServer.h"
 #include <QDebug>
 
-TcpServer::TcpServer(QObject* parent) : QObject(parent) {
+TcpServer::TcpServer(ScpiParser* sp, QObject* parent)
+    : QObject(parent), parser(sp) {
     m_server = new QTcpServer(this);
     connect(m_server, &QTcpServer::newConnection,
             this, &TcpServer::onNewConnection);
@@ -26,6 +27,8 @@ void TcpServer::onNewConnection() {
 
 void TcpServer::onReadyRead() {
     m_buffer = m_client->readAll();
-    QString messageText = QString::fromUtf8(m_buffer);
-    qDebug() << messageText;
+    QString command = QString::fromUtf8(m_buffer);
+
+    QString response = parser->parse(command);
+    m_client->write(response.toUtf8() + '\n');
 }
