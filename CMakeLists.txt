@@ -16,6 +16,10 @@ add_executable(EmulatorPSW7
     main.cpp
     src/TcpServer.cpp
     src/TcpServer.h
+    src/ScpiParser.h
+    src/ScpiParser.cpp
+    src/PowerSupply.h
+    src/PowerSupply.cpp
 )
 
 target_link_libraries(EmulatorPSW7 PRIVATE
