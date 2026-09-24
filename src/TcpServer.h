@@ -5,6 +5,8 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 
+#include "ScpiParser.h"
+
 class TcpServer : public QObject {
     Q_OBJECT
 private:
@@ -12,8 +14,10 @@ private:
     QTcpSocket* m_client;
 
     QByteArray m_buffer;
+
+    ScpiParser* parser;
 public:
-    TcpServer(QObject* parent = nullptr);
+    TcpServer(ScpiParser* sp, QObject* parent = nullptr);
 
 private slots:
     void onNewConnection();
