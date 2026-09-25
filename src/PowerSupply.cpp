@@ -9,10 +9,14 @@ float PowerSupply::get_random_float_3dp(const float min, const float max) {
 }
 
 float PowerSupply::get_voltage()  {
-    return (voltage_limit - 1) + get_random_float_3dp(0, 1);
+    return (voltage_limit - (voltage_limit == 0 ? 0 : 1)) + get_random_float_3dp(0, (voltage_limit == 0 ? 0 : 1));
 }
 
 void PowerSupply::set_voltage_limit(const float limit) {
+    if (limit < 0) {
+        voltage_limit = 0;
+        return;
+    }
     voltage_limit = limit;
 }
 
