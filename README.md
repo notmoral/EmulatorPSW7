@@ -149,25 +149,6 @@ cmake --build build --target EmulatorPSW7IntegrationTests
 
 Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted
 
-## Структура проекта
-
-EmulatorPSW7/
-├── src/
-│   ├── PowerSupply.cpp
-│   ├── PowerSupply.h
-│   ├── ScpiParser.cpp
-│   ├── ScpiParser.h
-│   ├── TcpServer.cpp
-│   └── TcpServer.h
-│
-├── tests/
-│   ├── tst_PowerSupply.cpp
-│   └── tst_Emulator.cpp
-│
-├── main.cpp
-├── CMakeLists.txt
-└── README.md
-
 ## Git
 
 Для разработки используются отдельные ветки:
