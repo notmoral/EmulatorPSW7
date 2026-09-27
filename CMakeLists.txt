@@ -16,11 +16,10 @@ add_executable(EmulatorPSW7
     main.cpp
     src/TcpServer.cpp
     src/TcpServer.h
-    src/ScpiParser.h
     src/ScpiParser.cpp
-    src/PowerSupply.h
+    src/ScpiParser.h
     src/PowerSupply.cpp
-    tests/tst_PowerSupply.cpp
+    src/PowerSupply.h
 )
 
 target_link_libraries(EmulatorPSW7 PRIVATE
@@ -30,8 +29,8 @@ target_link_libraries(EmulatorPSW7 PRIVATE
 
 add_executable(EmulatorPSW7Tests
     tests/tst_PowerSupply.cpp
-    src/PowerSupply.h
     src/PowerSupply.cpp
+    src/PowerSupply.h
 )
 
 target_link_libraries(EmulatorPSW7Tests PRIVATE
@@ -39,7 +38,18 @@ target_link_libraries(EmulatorPSW7Tests PRIVATE
     Qt${QT_VERSION_MAJOR}::Test
 )
 
+add_executable(EmulatorPSW7IntegrationTests
+    tests/tst_Emulator.cpp
+)
+
+target_link_libraries(EmulatorPSW7IntegrationTests PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Test
+)
+
 include(GNUInstallDirs)
+
 install(TARGETS EmulatorPSW7
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
