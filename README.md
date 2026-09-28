@@ -134,7 +134,7 @@ cmake --build build --target EmulatorPSW7IntegrationTests
 
 Запустить тест:
 
-./build/EmulatorPSW7IntegrationTests
+./build/Desktop_arm_darwin_generic_mach_o_64bit_Debug/EmulatorPSW7IntegrationTests
 
 Тест проверяет:
 
