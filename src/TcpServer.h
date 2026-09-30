@@ -6,6 +6,7 @@
 #include <QTcpSocket>
 
 #include "ScpiParser.h"
+#include "../src/Database.h"
 
 class TcpServer : public QObject {
     Q_OBJECT
@@ -16,6 +17,8 @@ private:
     QByteArray m_buffer;
 
     ScpiParser* parser;
+
+    Database m_database;
 public:
     TcpServer(ScpiParser* sp, QObject* parent = nullptr);
 

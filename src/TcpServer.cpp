@@ -3,6 +3,13 @@
 
 TcpServer::TcpServer(ScpiParser* sp, QObject* parent)
     : QObject(parent), parser(sp) {
+    m_database.open();
+    m_database.create_tables();
+
+    if (!m_database.open()) {
+        qDebug() << "Failed to open database";
+    }
+
     m_server = new QTcpServer(this);
     connect(m_server, &QTcpServer::newConnection,
             this, &TcpServer::onNewConnection);
@@ -31,4 +38,6 @@ void TcpServer::onReadyRead() {
 
     QString response = parser->parse(command);
     m_client->write(response.toUtf8() + '\n');
+
+    m_database.save_command("PSW7", command.trimmed(), response);
 }
