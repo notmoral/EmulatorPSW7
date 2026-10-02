@@ -1,5 +1,7 @@
 #include "Database.h"
+
 #include <QSqlQuery>
+#include <QVariantMap>
 
 Database::Database()
 {
@@ -9,7 +11,11 @@ Database::Database()
     }
     else
     {
-        m_database = QSqlDatabase::addDatabase("QSQLITE", "emulator_connection");
+        m_database = QSqlDatabase::addDatabase(
+            "QSQLITE",
+            "emulator_connection"
+            );
+
         m_database.setDatabaseName("emulator.db");
     }
 }
@@ -23,7 +29,8 @@ bool Database::save_command(
 
     query.prepare(
         "INSERT INTO command_history (device, command, response) "
-        "VALUES (:device, :command, :response)");
+        "VALUES (:device, :command, :response)"
+        );
 
     query.bindValue(":device", device);
     query.bindValue(":command", command);
@@ -48,5 +55,37 @@ bool Database::create_tables()
         "device TEXT NOT NULL,"
         "command TEXT NOT NULL,"
         "response TEXT"
-        ")");
+        ")"
+        );
+}
+
+QVariantList Database::get_history()
+{
+    QVariantList history;
+
+    QSqlQuery query(m_database);
+
+    if (!query.exec(
+            "SELECT id, timestamp, device, command, response "
+            "FROM command_history "
+            "ORDER BY id DESC"
+            ))
+    {
+        return history;
+    }
+
+    while (query.next())
+    {
+        QVariantMap record;
+
+        record["id"] = query.value("id");
+        record["timestamp"] = query.value("timestamp");
+        record["device"] = query.value("device");
+        record["command"] = query.value("command");
+        record["response"] = query.value("response");
+
+        history.append(record);
+    }
+
+    return history;
 }

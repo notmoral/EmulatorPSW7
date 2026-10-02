@@ -1,15 +1,44 @@
-#include <QCoreApplication>
-#include "src/TcpServer.h"
-#include "src/ScpiParser.h"
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QtQml>
+
 #include "src/PowerSupply.h"
+#include "src/ScpiParser.h"
+#include "src/TcpServer.h"
+#include "src/TcpClient.h"
+#include "src/HistoryModel.h"
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
-    QCoreApplication app(argc, argv);
+    QGuiApplication app(argc, argv);
 
-    PowerSupply ps;
-    ScpiParser parser(ps);
+    PowerSupply powerSupply;
+    ScpiParser parser(powerSupply);
     TcpServer server(&parser);
+
+    qmlRegisterType<TcpClient>(
+        "EmulatorPSW7",
+        1,
+        0,
+        "TcpClient"
+        );
+
+    qmlRegisterType<HistoryModel>(
+        "EmulatorPSW7",
+        1,
+        0,
+        "HistoryModel"
+        );
+
+    QQmlApplicationEngine engine;
+
+    engine.load(
+        QUrl(QStringLiteral("qrc:/qml/Main.qml"))
+        );
+
+    if (engine.rootObjects().isEmpty()) {
+        return -1;
+    }
 
     return app.exec();
 }
