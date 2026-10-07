@@ -4,6 +4,13 @@ cmake-build-*/
 .DS_Store
 emulator.db
 
+docs/
+Doxyfile.bak
+
+
+build/
+*.user
+
 # Prerequisites
 *.d
 

@@ -1,3 +1,8 @@
+/**
+ * @file HistoryModel.h
+ * @brief Модель списка истории команд для QML ListView.
+ */
+
 #ifndef HISTORYMODEL_H
 #define HISTORYMODEL_H
 
@@ -6,18 +11,25 @@
 
 #include "Database.h"
 
+/**
+ * @brief QAbstractListModel для отображения истории в QML.
+ *
+ * Роли: recordId, timestamp, device, command, response.
+ * Метод reload() перечитывает данные из базы.
+ */
 class HistoryModel : public QAbstractListModel
 {
     Q_OBJECT
 
 public:
+    /// Роли модели, доступные из QML-делегатов.
     enum Roles
     {
-        IdRole = Qt::UserRole + 1,
-        TimestampRole,
-        DeviceRole,
-        CommandRole,
-        ResponseRole
+        IdRole = Qt::UserRole + 1,  ///< Первичный ключ записи.
+        TimestampRole,              ///< Дата и время вставки.
+        DeviceRole,                 ///< Имя прибора.
+        CommandRole,                ///< Текст SCPI-команды.
+        ResponseRole                ///< Ответ прибора.
     };
 
     explicit HistoryModel(QObject *parent = nullptr);
@@ -31,11 +43,12 @@ public:
 
     QHash<int, QByteArray> roleNames() const override;
 
+    /// Перечитывает всю историю из БД и сбрасывает модель.
     Q_INVOKABLE void reload();
 
 private:
-    QVariantList m_history;
-    Database m_database;
+    QVariantList m_history;     ///< Кеш записей.
+    Database m_database;        ///< Источник данных.
 };
 
 #endif // HISTORYMODEL_H

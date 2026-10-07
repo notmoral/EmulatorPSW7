@@ -1,3 +1,8 @@
+/**
+ * @file main.cpp
+ * @brief Точка входа приложения EmulatorPSW7.
+ */
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
