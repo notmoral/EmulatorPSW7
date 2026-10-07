@@ -7,18 +7,23 @@
 class TcpClient : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
 
 public:
     explicit TcpClient(QObject *parent = nullptr);
 
+    bool isConnected() const;
+
     Q_INVOKABLE void connectToServer(
         const QString &host,
         int port
-    );
+        );
+
+    Q_INVOKABLE void disconnectFromServer();
 
     Q_INVOKABLE void sendCommand(
         const QString &command
-    );
+        );
 
 signals:
     void connectedChanged(bool connected);
