@@ -16,6 +16,8 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS
     Test
     Quick
     Qml
+    QuickControls2
+    QuickDialogs2
 )
 
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
@@ -25,7 +27,10 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Test
     Quick
     Qml
+    QuickControls2
+    QuickDialogs2
 )
+
 add_executable(EmulatorPSW7
     main.cpp
 
@@ -46,6 +51,9 @@ add_executable(EmulatorPSW7
 
     src/HistoryModel.cpp
     src/HistoryModel.h
+
+    src/CommandImporter.cpp
+    src/CommandImporter.h
 )
 
 qt_add_resources(EmulatorPSW7
@@ -61,6 +69,8 @@ target_link_libraries(EmulatorPSW7 PRIVATE
     Qt${QT_VERSION_MAJOR}::Sql
     Qt${QT_VERSION_MAJOR}::Quick
     Qt${QT_VERSION_MAJOR}::Qml
+    Qt${QT_VERSION_MAJOR}::QuickControls2
+    Qt${QT_VERSION_MAJOR}::QuickDialogs2
 )
 
 # PowerSupply unit tests
