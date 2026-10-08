@@ -1,6 +1,6 @@
 /**
  * @file main.cpp
- * @brief Точка входа приложения EmulatorPSW7.
+ * @brief Точка входа приложения.
  */
 
 #include <QGuiApplication>
@@ -10,7 +10,9 @@
 #include "src/PowerSupply.h"
 #include "src/ScpiParser.h"
 #include "src/TcpServer.h"
+#include "src/UdpServer.h"
 #include "src/TcpClient.h"
+#include "src/UdpClient.h"
 #include "src/HistoryModel.h"
 #include "src/CommandImporter.h"
 
@@ -22,9 +24,11 @@ int main(int argc, char *argv[])
 
     PowerSupply powerSupply;
     ScpiParser  parser(powerSupply);
-    TcpServer   server(&parser);
+    TcpServer   tcpServer(&parser);
+    UdpServer   udpServer(&parser);
 
     qmlRegisterType<TcpClient>("EmulatorPSW7", 1, 0, "TcpClient");
+    qmlRegisterType<UdpClient>("EmulatorPSW7", 1, 0, "UdpClient");
     qmlRegisterType<HistoryModel>("EmulatorPSW7", 1, 0, "HistoryModel");
     qmlRegisterType<CommandImporter>("EmulatorPSW7", 1, 0, "CommandImporter");
 

@@ -20,21 +20,50 @@ ApplicationWindow {
     property color accentBlue: "#0e639c"
     property color accentHover: "#1177bb"
 
+    // Активный клиент — TCP или UDP, в зависимости от выбора
+    property var activeClient: protocolSelector.currentIndex === 0 ? tcpClient : udpClient
+
     TcpClient {
-        id: client
+        id: tcpClient
 
         onConnectedChanged: function(connected) {
-            statusLabel.text = connected ? "Connected" : "Disconnected"
-            statusLabel.color = connected ? "#88dd88" : "#dd8888"
+            if (protocolSelector.currentIndex === 0) {
+                statusLabel.text = connected ? "Connected" : "Disconnected"
+                statusLabel.color = connected ? "#88dd88" : "#dd8888"
+            }
         }
-
         onResponseReceived: function(response) {
-            responseArea.text = response
-            historyModel.reload()
+            if (protocolSelector.currentIndex === 0) {
+                responseArea.text = response
+                historyModel.reload()
+            }
         }
-
         onErrorOccurred: function(error) {
-            responseArea.text = "Error: " + error
+            if (protocolSelector.currentIndex === 0) {
+                responseArea.text = "Error: " + error
+            }
+        }
+    }
+
+    UdpClient {
+        id: udpClient
+
+        onConnectedChanged: function(connected) {
+            if (protocolSelector.currentIndex === 1) {
+                statusLabel.text = connected ? "Connected" : "Disconnected"
+                statusLabel.color = connected ? "#88dd88" : "#dd8888"
+            }
+        }
+        onResponseReceived: function(response) {
+            if (protocolSelector.currentIndex === 1) {
+                responseArea.text = response
+                historyModel.reload()
+            }
+        }
+        onErrorOccurred: function(error) {
+            if (protocolSelector.currentIndex === 1) {
+                responseArea.text = "Error: " + error
+            }
         }
     }
 
@@ -49,17 +78,14 @@ ApplicationWindow {
             importStatus.text = "Импорт: 0/" + total
             importStatus.color = "#88dd88"
         }
-
         onImportProgress: function(current, total) {
             importStatus.text = "Импорт: " + current + "/" + total
         }
-
         onImportFinished: function(total) {
             importStatus.text = "Импорт завершён: " + total + " команд"
             importStatus.color = "#88dd88"
             historyModel.reload()
         }
-
         onImportError: function(error) {
             importStatus.text = "Ошибка: " + error
             importStatus.color = "#dd8888"
@@ -131,13 +157,28 @@ ApplicationWindow {
                 }
             }
 
+            ComboBox {
+                id: protocolSelector
+                Layout.preferredWidth: 90
+                model: ["TCP", "UDP"]
+                currentIndex: 0
+
+                onActivated: {
+                    // При смене протокола отключаем оба клиента
+                    if (tcpClient.connected) tcpClient.disconnectFromServer()
+                    if (udpClient.connected) udpClient.disconnectFromServer()
+                    statusLabel.text = "Disconnected"
+                    statusLabel.color = "#dd8888"
+                }
+            }
+
             Button {
-                text: client.connected ? "Disconnect" : "Connect"
+                text: activeClient.connected ? "Disconnect" : "Connect"
                 onClicked: {
-                    if (client.connected) {
-                        client.disconnectFromServer()
+                    if (activeClient.connected) {
+                        activeClient.disconnectFromServer()
                     } else {
-                        client.connectToServer(
+                        activeClient.connectToServer(
                             hostField.text,
                             Number(portField.text)
                         )
@@ -208,12 +249,12 @@ ApplicationWindow {
                     border.width: 1
                 }
 
-                onAccepted: client.sendCommand(commandField.text)
+                onAccepted: activeClient.sendCommand(commandField.text)
             }
 
             Button {
                 text: "Send"
-                onClicked: client.sendCommand(commandField.text)
+                onClicked: activeClient.sendCommand(commandField.text)
 
                 background: Rectangle {
                     color: parent.pressed
@@ -263,7 +304,6 @@ ApplicationWindow {
             }
         }
 
-        // Заголовок истории и кнопка обновления
         RowLayout {
             Layout.fillWidth: true
 
@@ -296,7 +336,6 @@ ApplicationWindow {
             }
         }
 
-        // Список истории
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
