@@ -1,3 +1,8 @@
+/**
+ * @file HistoryModel.cpp
+ * @brief Реализация модели истории команд для QML.
+ */
+
 #include "HistoryModel.h"
 
 HistoryModel::HistoryModel(QObject *parent)
@@ -38,6 +43,12 @@ QVariant HistoryModel::data(
     case DeviceRole:
         return record.value("device");
 
+    case InstrumentNameRole:
+        return record.value("instrument_name");
+
+    case ConnectionTypeRole:
+        return record.value("connection_type");
+
     case CommandRole:
         return record.value("command");
 
@@ -55,6 +66,8 @@ QHash<int, QByteArray> HistoryModel::roleNames() const
         { IdRole, "recordId" },
         { TimestampRole, "timestamp" },
         { DeviceRole, "device" },
+        { InstrumentNameRole, "instrumentName" },
+        { ConnectionTypeRole, "connectionType" },
         { CommandRole, "command" },
         { ResponseRole, "response" }
     };

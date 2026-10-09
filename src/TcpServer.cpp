@@ -41,7 +41,7 @@ void TcpServer::onReadyRead() {
     if (command.startsWith("[DEVICE=")) {
         const int endPos = command.indexOf(']');
         if (endPos > 0) {
-            device  = command.mid(8, endPos - 8);
+            device = command.mid(8, endPos - 8);
             command = command.mid(endPos + 1).trimmed();
         }
     }
@@ -49,5 +49,6 @@ void TcpServer::onReadyRead() {
     const QString response = parser->parse(device, command);
     m_client->write(response.toUtf8() + '\n');
 
-    m_database.save_command(device, command, response);
+    const QString instrumentName = parser->displayName(device);
+    m_database.save_command(device, instrumentName, "TCP", command, response);
 }

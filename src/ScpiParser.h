@@ -36,6 +36,14 @@ public:
      */
     QString parse(const QString& deviceName, const QString& command);
 
+    /**
+     * @brief Возвращает человекочитаемое имя прибора.
+     * @param deviceName Короткое имя прибора ("PSW7").
+     * @return Например, "GW Instek PSW7-800". Пустая строка,
+     *         если прибор не зарегистрирован.
+     */
+    QString displayName(const QString& deviceName) const;
+
 private:
     QMap<QString, IInstrument*> m_instruments;
 };

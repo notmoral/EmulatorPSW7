@@ -26,6 +26,8 @@ void TestDatabase::database_reads_saved_command()
 
     QVERIFY(database.save_command(
         "PSW7",
+        "GW Instek PSW7-800",
+        "TCP",
         "*IDN?",
         "GW-INSTEK,PSW800-4.32,TW123456,01.00.20110101"
         ));
@@ -33,7 +35,7 @@ void TestDatabase::database_reads_saved_command()
     QSqlQuery query(QSqlDatabase::database("emulator_connection"));
 
     QVERIFY(query.exec(
-        "SELECT device, command, response "
+        "SELECT device, instrument_name, connection_type, command, response "
         "FROM command_history "
         "ORDER BY id DESC "
         "LIMIT 1"
@@ -42,9 +44,11 @@ void TestDatabase::database_reads_saved_command()
     QVERIFY(query.next());
 
     QCOMPARE(query.value(0).toString(), QString("PSW7"));
-    QCOMPARE(query.value(1).toString(), QString("*IDN?"));
+    QCOMPARE(query.value(1).toString(), QString("GW Instek PSW7-800"));
+    QCOMPARE(query.value(2).toString(), QString("TCP"));
+    QCOMPARE(query.value(3).toString(), QString("*IDN?"));
     QCOMPARE(
-        query.value(2).toString(),
+        query.value(4).toString(),
         QString("GW-INSTEK,PSW800-4.32,TW123456,01.00.20110101")
         );
 }
@@ -58,6 +62,8 @@ void TestDatabase::database_saves_command()
 
     QVERIFY(database.save_command(
         "PSW7",
+        "GW Instek PSW7-800",
+        "TCP",
         "*IDN?",
         "GW-INSTEK,PSW800-4.32,TW123456,01.00.20110101"
         ));
@@ -80,10 +86,12 @@ void TestDatabase::database_table_columns()
         columns.append(query.value(1).toString());
     }
 
-    QCOMPARE(columns.size(), 5);
+    QCOMPARE(columns.size(), 7);
     QVERIFY(columns.contains("id"));
     QVERIFY(columns.contains("timestamp"));
     QVERIFY(columns.contains("device"));
+    QVERIFY(columns.contains("instrument_name"));
+    QVERIFY(columns.contains("connection_type"));
     QVERIFY(columns.contains("command"));
     QVERIFY(columns.contains("response"));
 }

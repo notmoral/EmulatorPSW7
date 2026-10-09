@@ -394,17 +394,31 @@ ApplicationWindow {
                         spacing: 10
 
                         Label {
-                            Layout.preferredWidth: 150
+                            Layout.preferredWidth: 140
                             text: timestamp
                             color: textSecondary
                             elide: Text.ElideRight
                         }
 
                         Label {
-                            Layout.preferredWidth: 80
+                            Layout.preferredWidth: 70
                             text: device
                             color: textSecondary
                             elide: Text.ElideRight
+                        }
+
+                        Label {
+                            Layout.preferredWidth: 150
+                            text: instrumentName
+                            color: textSecondary
+                            elide: Text.ElideRight
+                        }
+
+                        Label {
+                            Layout.preferredWidth: 60
+                            text: connectionType
+                            color: "#88dd88"
+                            font.bold: true
                         }
 
                         Label {

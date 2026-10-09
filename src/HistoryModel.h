@@ -14,7 +14,8 @@
 /**
  * @brief QAbstractListModel для отображения истории в QML.
  *
- * Роли: recordId, timestamp, device, command, response.
+ * Роли: recordId, timestamp, device, instrumentName,
+ * connectionType, command, response.
  * Метод reload() перечитывает данные из базы.
  */
 class HistoryModel : public QAbstractListModel
@@ -27,7 +28,9 @@ public:
     {
         IdRole = Qt::UserRole + 1,  ///< Первичный ключ записи.
         TimestampRole,              ///< Дата и время вставки.
-        DeviceRole,                 ///< Имя прибора.
+        DeviceRole,                 ///< Короткое имя прибора.
+        InstrumentNameRole,         ///< Полное имя прибора.
+        ConnectionTypeRole,         ///< Тип соединения (TCP/UDP/HTTP).
         CommandRole,                ///< Текст SCPI-команды.
         ResponseRole                ///< Ответ прибора.
     };
