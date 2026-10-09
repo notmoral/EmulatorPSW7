@@ -20,8 +20,14 @@ ApplicationWindow {
     property color accentBlue: "#0e639c"
     property color accentHover: "#1177bb"
 
-    // Активный клиент — TCP или UDP, в зависимости от выбора
-    property var activeClient: protocolSelector.currentIndex === 0 ? tcpClient : udpClient
+    property var activeClient: {
+        switch (protocolSelector.currentIndex) {
+            case 0:  return tcpClient
+            case 1:  return udpClient
+            case 2:  return httpClient
+            default: return tcpClient
+        }
+    }
 
     TcpClient {
         id: tcpClient
@@ -62,6 +68,28 @@ ApplicationWindow {
         }
         onErrorOccurred: function(error) {
             if (protocolSelector.currentIndex === 1) {
+                responseArea.text = "Error: " + error
+            }
+        }
+    }
+
+    HttpClient {
+        id: httpClient
+
+        onConnectedChanged: function(connected) {
+            if (protocolSelector.currentIndex === 2) {
+                statusLabel.text = connected ? "Connected" : "Disconnected"
+                statusLabel.color = connected ? "#88dd88" : "#dd8888"
+            }
+        }
+        onResponseReceived: function(response) {
+            if (protocolSelector.currentIndex === 2) {
+                responseArea.text = response
+                historyModel.reload()
+            }
+        }
+        onErrorOccurred: function(error) {
+            if (protocolSelector.currentIndex === 2) {
                 responseArea.text = "Error: " + error
             }
         }
@@ -159,14 +187,17 @@ ApplicationWindow {
 
             ComboBox {
                 id: protocolSelector
-                Layout.preferredWidth: 90
-                model: ["TCP", "UDP"]
+                Layout.preferredWidth: 100
+                model: ["TCP", "UDP", "HTTP"]
                 currentIndex: 0
 
                 onActivated: {
-                    // При смене протокола отключаем оба клиента
-                    if (tcpClient.connected) tcpClient.disconnectFromServer()
-                    if (udpClient.connected) udpClient.disconnectFromServer()
+                    if (tcpClient.connected)  tcpClient.disconnectFromServer()
+                    if (udpClient.connected)  udpClient.disconnectFromServer()
+                    if (httpClient.connected) httpClient.disconnectFromServer()
+
+                    portField.text = (currentIndex === 2) ? "8080" : "5025"
+
                     statusLabel.text = "Disconnected"
                     statusLabel.color = "#dd8888"
                 }
