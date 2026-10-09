@@ -56,6 +56,8 @@ add_executable(EmulatorPSW7
     src/CommandImporter.h
     src/UdpServer.h src/UdpServer.cpp
     src/UdpClient.h src/UdpClient.cpp
+    src/HttpServer.h src/HttpServer.cpp
+    src/HttpClient.h src/HttpClient.cpp
 )
 
 qt_add_resources(EmulatorPSW7
