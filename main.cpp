@@ -17,6 +17,7 @@
 #include "src/HttpClient.h"
 #include "src/HistoryModel.h"
 #include "src/CommandImporter.h"
+#include "src/Psw7Instrument.h"
 
 int main(int argc, char *argv[])
 {
@@ -24,8 +25,10 @@ int main(int argc, char *argv[])
 
     QQuickStyle::setStyle("Fusion");
 
-    PowerSupply powerSupply;
-    ScpiParser  parser(powerSupply);
+    Psw7Instrument psw7;
+    ScpiParser     parser;
+    parser.registerInstrument(&psw7);
+
     TcpServer   tcpServer(&parser);
     UdpServer   udpServer(&parser);
     HttpServer  httpServer(&parser);

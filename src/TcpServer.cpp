@@ -46,7 +46,7 @@ void TcpServer::onReadyRead() {
         }
     }
 
-    const QString response = parser->parse(command);
+    const QString response = parser->parse(device, command);
     m_client->write(response.toUtf8() + '\n');
 
     m_database.save_command(device, command, response);
