@@ -136,7 +136,7 @@ void HttpServer::handleRequest(QTcpSocket* socket, const QByteArray& request)
 
     if (device.isEmpty()) device = "PSW7";
 
-    const QString response = parser->parse(cmd);
+    const QString response = parser->parse(device, cmd);
     m_database.save_command(device, cmd, response);
 
     QJsonObject obj;

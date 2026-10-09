@@ -1,45 +1,43 @@
 /**
  * @file ScpiParser.h
- * @brief Разбор SCPI-команд, приходящих от клиента.
+ * @brief Диспетчер SCPI-команд между несколькими приборами.
  */
 
 #ifndef SCPIPARSER_H
 #define SCPIPARSER_H
 
 #include <QString>
-#include "PowerSupply.h"
+#include <QMap>
+
+#include "IInstrument.h"
 
 /**
- * @brief Парсер SCPI-команд.
+ * @brief Разбирает SCPI-команды и направляет их нужному прибору.
  *
- * Принимает строку команды, возвращает строку-ответ. Работает
- * поверх объекта PowerSupply, который хранит состояние прибора.
+ * Хранит map<короткое_имя, IInstrument*>. Метод parse() получает
+ * имя прибора и команду, находит соответствующий IInstrument и
+ * делегирует обработку ему.
  */
 class ScpiParser {
-private:
-    /// Ссылка на источник питания, состояние которого меняем.
-    PowerSupply& power_supply;
-
-    /**
-     * @brief Определяет тип команды и формирует ответ.
-     * @param command Очищенная от \n и \r SCPI-команда.
-     * @return Текстовый ответ. Пустая строка, если команда не распознана.
-     */
-    QString recognize(const QString& command);
-
 public:
-    /**
-     * @brief Конструктор.
-     * @param ps Ссылка на источник питания.
-     */
-    ScpiParser(PowerSupply& ps);
+    ScpiParser();
 
     /**
-     * @brief Парсит команду и возвращает ответ.
-     * @param command Сырая команда, возможно с \r\n.
-     * @return Ответ прибора.
+     * @brief Регистрирует прибор в парсере.
+     * @param instrument Указатель (владение остаётся у вызывающей стороны).
      */
-    QString parse(const QString& command);
+    void registerInstrument(IInstrument* instrument);
+
+    /**
+     * @brief Парсит команду для указанного прибора.
+     * @param deviceName Короткое имя прибора ("PSW7").
+     * @param command Текст SCPI-команды.
+     * @return Ответ прибора или пустая строка.
+     */
+    QString parse(const QString& deviceName, const QString& command);
+
+private:
+    QMap<QString, IInstrument*> m_instruments;
 };
 
 #endif // SCPIPARSER_H
