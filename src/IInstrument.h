@@ -22,6 +22,9 @@ public:
     /// Короткое имя для сопоставления (например, "PSW7").
     virtual QString name() const = 0;
 
+    /// Человекочитаемое имя (например, "GW Instek PSW7-800").
+    virtual QString displayName() const = 0;
+
     /// Ответ на команду *IDN?.
     virtual QString identify() const = 0;
 

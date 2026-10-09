@@ -15,6 +15,11 @@ QString Psw7Instrument::name() const
     return "PSW7";
 }
 
+QString Psw7Instrument::displayName() const
+{
+    return "GW Instek PSW7-800";
+}
+
 QString Psw7Instrument::identify() const
 {
     return "GW-INSTEK,PSW800-4.32,TW123456,01.00.20110101";

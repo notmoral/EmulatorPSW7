@@ -20,6 +20,7 @@ public:
     Psw7Instrument();
 
     QString name() const override;
+    QString displayName() const override;
     QString identify() const override;
     QString handleCommand(const QString& command) override;
 
