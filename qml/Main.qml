@@ -203,6 +203,13 @@ ApplicationWindow {
                 }
             }
 
+            ComboBox {
+                id: deviceSelector
+                Layout.preferredWidth: 130
+                model: ["PSW7", "E36312A"]
+                currentIndex: 0
+            }
+
             Button {
                 text: activeClient.connected ? "Disconnect" : "Connect"
                 onClicked: {
@@ -280,12 +287,16 @@ ApplicationWindow {
                     border.width: 1
                 }
 
-                onAccepted: activeClient.sendCommand(commandField.text)
+                onAccepted: activeClient.sendCommand(
+                    "[DEVICE=" + deviceSelector.currentText + "]" + commandField.text
+                )
             }
 
             Button {
                 text: "Send"
-                onClicked: activeClient.sendCommand(commandField.text)
+                onClicked: activeClient.sendCommand(
+                    "[DEVICE=" + deviceSelector.currentText + "]" + commandField.text
+                )
 
                 background: Rectangle {
                     color: parent.pressed

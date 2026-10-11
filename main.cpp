@@ -18,6 +18,7 @@
 #include "src/HistoryModel.h"
 #include "src/CommandImporter.h"
 #include "src/Psw7Instrument.h"
+#include "src/E36312AInstrument.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,9 +26,11 @@ int main(int argc, char *argv[])
 
     QQuickStyle::setStyle("Fusion");
 
-    Psw7Instrument psw7;
-    ScpiParser     parser;
+    Psw7Instrument   psw7;
+    E36312AInstrument e36312a;
+    ScpiParser       parser;
     parser.registerInstrument(&psw7);
+    parser.registerInstrument(&e36312a);
 
     TcpServer   tcpServer(&parser);
     UdpServer   udpServer(&parser);
