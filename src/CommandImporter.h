@@ -8,7 +8,6 @@
 
 #include <QObject>
 #include <QStringList>
-#include "TcpClient.h"
 
 /**
  * @brief Читает файл с командами и последовательно отправляет их серверу.
@@ -17,9 +16,11 @@
  * SCPI-команды. Строки, начинающиеся с '#', игнорируются.
  *
  * Перед каждой командой клиент посылает префикс @c [DEVICE=NAME],
- * чтобы TcpServer сохранил запись в БД под правильным именем.
+ * чтобы сервер сохранил запись под правильным именем прибора.
  *
- * Прогресс передаётся через сигналы importStarted/importProgress/importFinished.
+ * Клиент создаётся в момент старта и выбирается по имени протокола:
+ * "TCP", "UDP" или "HTTP". Это позволяет импортировать команды любым
+ * из трёх поддерживаемых транспортов.
  */
 class CommandImporter : public QObject
 {
@@ -28,6 +29,7 @@ class CommandImporter : public QObject
 
 public:
     explicit CommandImporter(QObject* parent = nullptr);
+    ~CommandImporter() override;
 
     /**
      * @brief Загружает файл и парсит его.
@@ -40,9 +42,12 @@ public:
      * @brief Запускает процесс импорта.
      * @param host Адрес сервера.
      * @param port Порт сервера.
+     * @param protocol Имя протокола: "TCP", "UDP" или "HTTP".
+     *                 По умолчанию "TCP".
      */
     Q_INVOKABLE void startImport(const QString& host = "127.0.0.1",
-                                 int port = 5025);
+                                 int port = 5025,
+                                 const QString& protocol = "TCP");
 
     /// @return Имя прибора, прочитанное из первой строки файла.
     Q_INVOKABLE QString deviceName() const { return m_deviceName; }
@@ -75,11 +80,13 @@ private slots:
     void onErrorOccurred(const QString& error);
 
 private:
-    void sendCurrentCommand();  ///< Отправляет команду с текущим индексом.
+    void sendCurrentCommand();          ///< Отправляет команду с текущим индексом.
+    void cleanupClient();               ///< Удаляет клиента и сбрасывает указатель.
+    bool createClient(const QString& protocol);  ///< Создаёт клиент по имени протокола.
 
-    TcpClient   m_client;       ///< Отдельный TCP-клиент для импорта.
-    QString     m_deviceName;   ///< Имя прибора из файла.
-    QStringList m_commands;     ///< Список SCPI-команд.
+    QObject*    m_client = nullptr;     ///< Активный клиент (TcpClient/UdpClient/HttpClient).
+    QString     m_deviceName;           ///< Имя прибора из файла.
+    QStringList m_commands;             ///< Список SCPI-команд.
     int         m_currentIndex = 0;
     bool        m_running = false;
 };
