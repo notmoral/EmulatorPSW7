@@ -132,7 +132,8 @@ ApplicationWindow {
             if (importer.loadFile(path)) {
                 importer.startImport(
                     hostField.text,
-                    Number(portField.text)
+                    Number(portField.text),
+                    protocolSelector.currentText
                 )
             }
         }

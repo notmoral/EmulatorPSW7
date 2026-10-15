@@ -56,9 +56,24 @@ void HttpClient::sendCommand(const QString& command)
         return;
     }
 
+    QString cmd    = command.trimmed();
+    QString device;
+
+    // Извлекаем префикс [DEVICE=NAME] и передаём его отдельным
+    // query-параметром device=, как ожидает HttpServer.
+    if (cmd.startsWith("[DEVICE=")) {
+        const int endPos = cmd.indexOf(']');
+        if (endPos > 0) {
+            device = cmd.mid(8, endPos - 8);
+            cmd    = cmd.mid(endPos + 1).trimmed();
+        }
+    }
+
     QUrl url = m_baseUrl;
     QUrlQuery query;
-    query.addQueryItem("cmd", command.trimmed());
+    query.addQueryItem("cmd", cmd);
+    if (!device.isEmpty())
+        query.addQueryItem("device", device);
     url.setQuery(query);
 
     QNetworkReply* reply = m_manager.get(QNetworkRequest(url));
@@ -79,7 +94,6 @@ void HttpClient::sendCommand(const QString& command)
                 doc.object().value("response").toString();
             emit responseReceived(response);
         } else {
-            // На случай, если сервер вернул не JSON.
             emit responseReceived(QString::fromUtf8(data).trimmed());
         }
     });

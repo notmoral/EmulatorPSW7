@@ -1,0 +1,36 @@
+PSW7
+# --- Идентификация ---
+*IDN?
+*OPC?
+
+# --- Измерение напряжения ---
+MEASure:VOLTage:DC?
+
+# --- Лимит напряжения ---
+SOURce:VOLTage:LIMit?
+SOURce:VOLTage:LIMit 10
+SOURce:VOLTage:LIMit?
+
+# --- Измерение при лимите 10 В ---
+MEASure:VOLTage:DC?
+MEASure:VOLTage:DC?
+MEASure:VOLTage:DC?
+
+# --- Меняем лимит ---
+SOURce:VOLTage:LIMit 5
+SOURce:VOLTage:LIMit?
+
+# --- Измерение при лимите 5 В ---
+MEASure:VOLTage:DC?
+MEASure:VOLTage:DC?
+MEASure:VOLTage:DC?
+
+# --- Граничный случай: лимит 0 ---
+SOURce:VOLTage:LIMit 0
+SOURce:VOLTage:LIMit?
+MEASure:VOLTage:DC?
+
+# --- Возврат к рабочему значению ---
+SOURce:VOLTage:LIMit 12
+SOURce:VOLTage:LIMit?
+MEASure:VOLTage:DC?

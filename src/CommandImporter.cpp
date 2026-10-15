@@ -1,17 +1,63 @@
+/**
+ * @file CommandImporter.cpp
+ * @brief Реализация импорта SCPI-команд из файла.
+ */
+
 #include "CommandImporter.h"
+#include "TcpClient.h"
+#include "UdpClient.h"
+#include "HttpClient.h"
 
 #include <QFile>
 #include <QTextStream>
+#include <QMetaObject>
 
 CommandImporter::CommandImporter(QObject* parent)
     : QObject(parent)
 {
-    connect(&m_client, &TcpClient::connectedChanged,
-            this, &CommandImporter::onConnectedChanged);
-    connect(&m_client, &TcpClient::responseReceived,
-            this, &CommandImporter::onResponseReceived);
-    connect(&m_client, &TcpClient::errorOccurred,
-            this, &CommandImporter::onErrorOccurred);
+}
+
+CommandImporter::~CommandImporter()
+{
+    cleanupClient();
+}
+
+bool CommandImporter::createClient(const QString& protocol)
+{
+    cleanupClient();
+
+    const QString p = protocol.toUpper();
+
+    if (p == "TCP") {
+        m_client = new TcpClient(this);
+    } else if (p == "UDP") {
+        m_client = new UdpClient(this);
+    } else if (p == "HTTP") {
+        m_client = new HttpClient(this);
+    } else {
+        emit importError("Неизвестный протокол: " + protocol);
+        return false;
+    }
+
+    // Подключаем сигналы. Так как тип клиента выбран в рантайме,
+    // используем старый строковый синтаксис connect.
+    connect(m_client, SIGNAL(connectedChanged(bool)),
+            this, SLOT(onConnectedChanged(bool)));
+    connect(m_client, SIGNAL(responseReceived(QString)),
+            this, SLOT(onResponseReceived(QString)));
+    connect(m_client, SIGNAL(errorOccurred(QString)),
+            this, SLOT(onErrorOccurred(QString)));
+
+    return true;
+}
+
+void CommandImporter::cleanupClient()
+{
+    if (m_client) {
+        m_client->disconnect(this);
+        m_client->deleteLater();
+        m_client = nullptr;
+    }
 }
 
 bool CommandImporter::loadFile(const QString& filePath)
@@ -43,7 +89,9 @@ bool CommandImporter::loadFile(const QString& filePath)
     return true;
 }
 
-void CommandImporter::startImport(const QString& host, int port)
+void CommandImporter::startImport(const QString& host,
+                                  int port,
+                                  const QString& protocol)
 {
     if (m_running) {
         emit importError("Импорт уже выполняется");
@@ -53,13 +101,18 @@ void CommandImporter::startImport(const QString& host, int port)
         emit importError("Нет загруженных команд");
         return;
     }
+    if (!createClient(protocol)) {
+        return;
+    }
 
     m_running = true;
     m_currentIndex = 0;
     emit runningChanged();
     emit importStarted(m_commands.size());
 
-    m_client.connectToServer(host, port);
+    QMetaObject::invokeMethod(m_client, "connectToServer",
+                              Q_ARG(QString, host),
+                              Q_ARG(int, port));
 }
 
 void CommandImporter::sendCurrentCommand()
@@ -67,7 +120,9 @@ void CommandImporter::sendCurrentCommand()
     const QString command = m_commands.at(m_currentIndex);
     const QString prefixed =
         "[DEVICE=" + m_deviceName + "]" + command;
-    m_client.sendCommand(prefixed);
+
+    QMetaObject::invokeMethod(m_client, "sendCommand",
+                              Q_ARG(QString, prefixed));
 }
 
 void CommandImporter::onConnectedChanged(bool connected)

@@ -1,0 +1,45 @@
+E36312A
+# --- Идентификация ---
+*IDN?
+*OPC?
+
+# --- Выход выключен: измерения около нуля ---
+OUTPut:STATe?
+MEASure:VOLTage:DC?
+MEASure:CURRent:DC?
+
+# --- Включаем выход ---
+OUTPut:STATe ON
+OUTPut:STATe?
+
+# --- Лимит напряжения и тока по умолчанию (5 В / 1 А) ---
+SOURce:VOLTage:LIMit?
+SOURce:CURRent:LIMit?
+MEASure:VOLTage:DC?
+MEASure:CURRent:DC?
+
+# --- Меняем лимит напряжения на 12 В ---
+SOURce:VOLTage:LIMit 12
+SOURce:VOLTage:LIMit?
+MEASure:VOLTage:DC?
+MEASure:VOLTage:DC?
+
+# --- Меняем лимит тока на 2.5 А ---
+SOURce:CURRent:LIMit 2.5
+SOURce:CURRent:LIMit?
+MEASure:CURRent:DC?
+MEASure:CURRent:DC?
+
+# --- Выход снова выключен ---
+OUTPut:STATe OFF
+OUTPut:STATe?
+MEASure:VOLTage:DC?
+MEASure:CURRent:DC?
+
+# --- Возврат к рабочему состоянию ---
+SOURce:VOLTage:LIMit 5
+SOURce:CURRent:LIMit 1
+OUTPut:STATe ON
+OUTPut:STATe?
+MEASure:VOLTage:DC?
+MEASure:CURRent:DC?
