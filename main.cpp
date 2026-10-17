@@ -3,6 +3,10 @@
  * @brief Точка входа приложения EmulatorPSW7.
  */
 
+#include <QNetworkInterface>
+#include <QNetworkAddressEntry>
+#include <QDebug>
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickStyle>
@@ -29,6 +33,25 @@ int main(int argc, char *argv[])
     Psw7Instrument   psw7;
     E36312AInstrument e36312a;
     ScpiParser       parser;
+
+    // Вывод доступных IP-адресов для удаленного подключения.
+    qDebug() << "--------------------------------------------------";
+    qDebug() << "Servers are listening on all interfaces (0.0.0.0).";
+    qDebug() << "To connect from another machine, use one of these IPs:";
+    const QList<QHostAddress> allAddresses = QNetworkInterface::allAddresses();
+    bool foundIp = false;
+    for (const QHostAddress &address : allAddresses) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol &&
+            !address.isLoopback()) {
+            qDebug().noquote() << "  - " << address.toString();
+            foundIp = true;
+        }
+    }
+    if (!foundIp) {
+        qDebug() << "  (No external IPv4 addresses found. Are you offline?)";
+    }
+    qDebug() << "--------------------------------------------------";
+
     parser.registerInstrument(&psw7);
     parser.registerInstrument(&e36312a);
 
