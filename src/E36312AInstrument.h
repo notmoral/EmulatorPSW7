@@ -11,13 +11,19 @@
 /**
  * @brief Прибор Keysight E36312A (трёхканальный источник питания).
  *
- * Реализует упрощённый набор SCPI-команд:
- * *IDN?, *OPC?, MEASure:VOLTage:DC?, MEASure:CURRent:DC?,
- * SOURce:VOLTage:LIMit [value]?, OUTPut:STATe [ON|OFF]?.
+ * Реализует SCPI-команды с поддержкой трёх независимых каналов.
  *
- * Каналы пока не разделяются — все команды относятся к первому каналу.
- * Это сделано осознанно: цель этого этапа — показать, что архитектура
- * поддерживает несколько разных приборов одновременно.
+ * Каналы:
+ *  - 1: 6V / 5A
+ *  - 2: 25V / 1A
+ *  - 3: 25V / 1A
+ *
+ * Выбор канала:
+ *  - явный префикс номера в команде (`OUTPut2:STATe ON`)
+ *  - либо через `INSTrument:NSELect <1|2|3>` — устанавливает канал по умолчанию
+ *
+ * Команды без номера канала (`OUTPut:STATe?`) применяются к текущему
+ * выбранному каналу.
  */
 class E36312AInstrument : public IInstrument {
 public:
@@ -29,17 +35,20 @@ public:
     QString handleCommand(const QString& command) override;
 
 private:
-    /// Текущий лимит напряжения, В.
-    float m_voltageLimit = 5.000f;
+    /// Состояние одного канала.
+    struct Channel {
+        float voltageLimit = 5.0f;  ///< Лимит напряжения, В.
+        float currentLimit = 1.0f;  ///< Лимит тока, А.
+        bool  outputOn     = false; ///< Состояние выхода.
+    };
 
-    /// Текущий лимит тока, А.
-    float m_currentLimit = 1.000f;
+    Channel m_channels[3];      ///< Три канала (индексы 0, 1, 2).
+    int     m_selectedChannel = 0; ///< Текущий канал (0..2).
 
-    /// Состояние выхода (true = ON).
-    bool m_outputOn = false;
-
-    /// Случайное значение с 3 знаками после запятой в диапазоне [min, max].
     static float randomValue(float min, float max);
+
+    /// Проверяет, что индекс канала в диапазоне 0..2.
+    static bool validChannel(int index);
 };
 
 #endif // E36312AINSTRUMENT_H
