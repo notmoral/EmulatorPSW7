@@ -99,6 +99,17 @@ ApplicationWindow {
         id: historyModel
     }
 
+    Timer {
+        id: autoRefreshTimer
+        interval: 2000
+        running: true
+        repeat: true
+
+        onTriggered: {
+            historyModel.reload()
+        }
+    }
+
     CommandImporter {
         id: importer
 
