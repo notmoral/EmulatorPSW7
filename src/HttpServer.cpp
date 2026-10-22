@@ -25,8 +25,8 @@ HttpServer::HttpServer(ScpiParser* sp, QObject* parent)
     connect(m_server, &QTcpServer::newConnection,
             this, &HttpServer::onNewConnection);
 
-    if (m_server->listen(QHostAddress("127.0.0.1"), 8080)) {
-        qDebug() << "HTTP server started on 127.0.0.1:8080";
+    if (m_server->listen(QHostAddress::AnyIPv4, 8080)) {
+        qDebug() << "HTTP server started on 0.0.0.0:8080 (all interfaces)";
     } else {
         qDebug() << "Failed to start HTTP server:"
                  << m_server->errorString();

@@ -17,8 +17,8 @@ UdpServer::UdpServer(ScpiParser* sp, QObject* parent)
     connect(m_socket, &QUdpSocket::readyRead,
             this, &UdpServer::onReadyRead);
 
-    if (m_socket->bind(QHostAddress("127.0.0.1"), 5025)) {
-        qDebug() << "UDP server started on 127.0.0.1:5025";
+    if (m_socket->bind(QHostAddress::AnyIPv4, 5025)) {
+        qDebug() << "UDP server started on 0.0.0.0:5025 (all interfaces)";
     } else {
         qDebug() << "Failed to start UDP server:"
                  << m_socket->errorString();
