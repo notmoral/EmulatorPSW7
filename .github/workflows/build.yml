@@ -45,8 +45,7 @@ jobs:
 
 
       - name: Install Doxygen
-        run: choco install doxygen.install -y
-        shell: pwsh
+        uses: ssciwr/doxygen-install@v1
 
       - name: Generate Doxygen docs
         run: doxygen Doxyfile
