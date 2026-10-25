@@ -42,3 +42,36 @@ jobs:
       - name: Run Database tests
         run: .\build\EmulatorPSW7DatabaseTests.exe
         shell: pwsh
+
+
+      - name: Install Doxygen
+        run: choco install doxygen.install -y
+        shell: pwsh
+
+      - name: Generate Doxygen docs
+        run: doxygen Doxyfile
+        shell: pwsh
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/html
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: build-and-test
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
