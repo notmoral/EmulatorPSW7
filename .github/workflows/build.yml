@@ -45,8 +45,16 @@ jobs:
 
       - name: Start emulator (background)
         run: |
-          Start-Process -FilePath ".\build\EmulatorPSW7.exe" -NoNewWindow
-          Start-Sleep -Seconds 3
+          $env:PATH = "$env:QT_ROOT_DIR\bin;$env:PATH"
+          $proc = Start-Process -FilePath ".\build\EmulatorPSW7.exe" -PassThru -WindowStyle Hidden
+          $proc.Id | Out-File -FilePath emulator.pid
+          Start-Sleep -Seconds 5
+          $running = Get-Process -Id $proc.Id -ErrorAction SilentlyContinue
+          if (-not $running) {
+            Write-Host "Emulator failed to start."
+            exit 1
+          }
+          Write-Host "Emulator PID: $($proc.Id)"
         shell: pwsh
 
       - name: Run UDP integration tests
