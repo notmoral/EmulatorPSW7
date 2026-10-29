@@ -50,7 +50,7 @@ public:
      * @return Список QVariantMap с ключами id, timestamp, device,
      *         instrument_name, connection_type, command, response.
      */
-    QVariantList get_history();
+     QVariantList get_history(const QString& filter = QString());
 
 private:
     QSqlDatabase m_database;    ///< Соединение Qt SQL.

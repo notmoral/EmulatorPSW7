@@ -102,7 +102,7 @@ ApplicationWindow {
     Timer {
         id: autoRefreshTimer
         interval: 2000
-        running: true
+        running: autoRefreshSwitch.checked
         repeat: true
 
         onTriggered: {
@@ -357,17 +357,50 @@ ApplicationWindow {
                 border.width: 1
             }
         }
-
         RowLayout {
             Layout.fillWidth: true
+            spacing: 10
 
             Label {
                 text: "Command history"
                 font.bold: true
                 font.pixelSize: 18
                 color: textPrimary
-                Layout.fillWidth: true
             }
+
+            TextField {
+                id: historyFilterField
+                Layout.preferredWidth: 200
+                placeholderText: "Поиск по команде или прибору..."
+                color: textPrimary
+                placeholderTextColor: textSecondary
+                background: Rectangle {
+                    color: bgLight
+                    radius: 4
+                    border.color: borderColor
+                    border.width: 1
+                }
+
+                onTextChanged: {
+                    historyModel.setFilter(text)
+                }
+            }
+
+            Switch {
+                id: autoRefreshSwitch
+                text: "Автообновление"
+                checked: true
+                font.pixelSize: 14
+                contentItem: Text {
+                    text: parent.text
+                    color: textPrimary
+                    font.pixelSize: 14
+                    leftPadding: parent.indicator.width + 6
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            Item { Layout.fillWidth: true }
 
             Button {
                 text: "Refresh"

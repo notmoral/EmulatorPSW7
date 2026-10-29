@@ -100,20 +100,36 @@ bool Database::create_tables()
     return true;
 }
 
-QVariantList Database::get_history()
+QVariantList Database::get_history(const QString& filter)
 {
     QVariantList history;
 
     QSqlQuery query(m_database);
 
-    if (!query.exec(
+    if (filter.trimmed().isEmpty()) {
+        if (!query.exec(
+                "SELECT id, timestamp, device, instrument_name, "
+                "connection_type, command, response "
+                "FROM command_history "
+                "ORDER BY id DESC"
+                ))
+        {
+            return history;
+        }
+    } else {
+        query.prepare(
             "SELECT id, timestamp, device, instrument_name, "
             "connection_type, command, response "
             "FROM command_history "
+            "WHERE device LIKE :f OR instrument_name LIKE :f "
+            "OR command LIKE :f OR response LIKE :f "
             "ORDER BY id DESC"
-            ))
-    {
-        return history;
+            );
+        const QString pattern = "%" + filter.trimmed() + "%";
+        query.bindValue(":f", pattern);
+        if (!query.exec()) {
+            return history;
+        }
     }
 
     while (query.next())
