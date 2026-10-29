@@ -47,11 +47,26 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     /// Перечитывает всю историю из БД и сбрасывает модель.
-    Q_INVOKABLE void reload();
+        Q_INVOKABLE void reload();
+
+    /**
+     * @brief Перечитывает историю с фильтром.
+     * @param filter Подстрока для поиска по device/instrumentName/command/response.
+     */
+    Q_INVOKABLE void setFilter(const QString& filter);
+
+    /**
+     * @brief Экспортирует текущую историю (с учётом фильтра) в файл.
+     * @param filePath Путь к файлу. Расширение определяет формат:
+     *                 ".csv" или ".json". Иначе возвращается false.
+     * @return true при успешной записи.
+     */
+    Q_INVOKABLE bool exportTo(const QString& filePath);
 
 private:
     QVariantList m_history;     ///< Кеш записей.
     Database m_database;        ///< Источник данных.
+    QString m_filter;
 };
 
 #endif // HISTORYMODEL_H
