@@ -43,6 +43,28 @@ jobs:
         run: .\build\EmulatorPSW7DatabaseTests.exe
         shell: pwsh
 
+      - name: Start emulator (background)
+        run: |
+          Start-Process -FilePath ".\build\EmulatorPSW7.exe" -NoNewWindow
+          Start-Sleep -Seconds 3
+        shell: pwsh
+
+      - name: Run UDP integration tests
+        run: .\build\EmulatorPSW7UdpTests.exe
+        shell: pwsh
+
+      - name: Run HTTP integration tests
+        run: .\build\EmulatorPSW7HttpTests.exe
+        shell: pwsh
+
+      - name: Run CommandImporter integration tests
+        run: .\build\EmulatorPSW7ImporterTests.exe
+        shell: pwsh
+
+      - name: Stop emulator
+        run: Stop-Process -Name EmulatorPSW7 -ErrorAction SilentlyContinue
+        shell: pwsh
+
 
       - name: Install Doxygen
         uses: ssciwr/doxygen-install@v1
