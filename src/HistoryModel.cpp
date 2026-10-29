@@ -77,7 +77,13 @@ void HistoryModel::reload()
 {
     beginResetModel();
 
-    m_history = m_database.get_history();
+    m_history = m_database.get_history(m_filter);
 
     endResetModel();
+}
+
+void HistoryModel::setFilter(const QString& filter)
+{
+    m_filter = filter;
+    reload();
 }

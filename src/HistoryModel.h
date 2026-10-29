@@ -47,11 +47,18 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     /// Перечитывает всю историю из БД и сбрасывает модель.
-    Q_INVOKABLE void reload();
+        Q_INVOKABLE void reload();
+
+    /**
+     * @brief Перечитывает историю с фильтром.
+     * @param filter Подстрока для поиска по device/instrumentName/command/response.
+     */
+    Q_INVOKABLE void setFilter(const QString& filter);
 
 private:
     QVariantList m_history;     ///< Кеш записей.
     Database m_database;        ///< Источник данных.
+    QString m_filter;
 };
 
 #endif // HISTORYMODEL_H
