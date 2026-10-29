@@ -63,6 +63,9 @@ add_executable(EmulatorPSW7
     src/Psw7Instrument.cpp
     src/E36312AInstrument.h
     src/E36312AInstrument.cpp
+
+    src/Dp832Instrument.cpp
+    src/Dp832Instrument.h
 )
 
 qt_add_resources(EmulatorPSW7
