@@ -118,6 +118,48 @@ target_link_libraries(EmulatorPSW7IntegrationTests PRIVATE
     Qt${QT_VERSION_MAJOR}::Test
 )
 
+
+# UDP integration tests
+add_executable(EmulatorPSW7UdpTests
+    tests/tst_UdpEmulator.cpp
+)
+
+target_link_libraries(EmulatorPSW7UdpTests PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Test
+)
+
+# HTTP integration tests
+add_executable(EmulatorPSW7HttpTests
+    tests/tst_HttpEmulator.cpp
+)
+
+target_link_libraries(EmulatorPSW7HttpTests PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Test
+)
+
+# CommandImporter integration tests
+add_executable(EmulatorPSW7ImporterTests
+    tests/tst_CommandImporter.cpp
+    src/CommandImporter.cpp
+    src/CommandImporter.h
+    src/TcpClient.cpp
+    src/TcpClient.h
+    src/UdpClient.cpp
+    src/UdpClient.h
+    src/HttpClient.cpp
+    src/HttpClient.h
+)
+
+target_link_libraries(EmulatorPSW7ImporterTests PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Network
+    Qt${QT_VERSION_MAJOR}::Test
+)
+
 include(GNUInstallDirs)
 
 install(TARGETS EmulatorPSW7
