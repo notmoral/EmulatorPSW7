@@ -150,6 +150,31 @@ ApplicationWindow {
         }
     }
 
+        FileDialog {
+        id: exportDialog
+
+        property string exportFormat: "csv"
+
+        function openExport(format) {
+            exportFormat = format
+            nameFilters = (format === "csv")
+                ? ["CSV files (*.csv)"]
+                : ["JSON files (*.json)"]
+            fileMode = FileDialog.SaveFile
+            defaultSuffix = format
+            open()        // <-- встроенный open() самого FileDialog
+        }
+
+        onAccepted: {
+            let path = selectedFile.toString()
+            path = decodeURIComponent(path.replace(/^file:\/{2,3}/, ""))
+            if (!path.endsWith("." + exportFormat)) {
+                path += "." + exportFormat
+            }
+            historyModel.exportTo(path)
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 30
@@ -357,7 +382,10 @@ ApplicationWindow {
                 border.width: 1
             }
         }
-        RowLayout {
+
+	
+	            
+                    RowLayout {
             Layout.fillWidth: true
             spacing: 10
 
@@ -401,6 +429,40 @@ ApplicationWindow {
             }
 
             Item { Layout.fillWidth: true }
+
+            Button {
+                text: "CSV"
+                onClicked: exportDialog.openExport("csv")
+                background: Rectangle {
+                    color: parent.pressed ? accentHover : (parent.hovered ? "#4a4a4a" : bgLight)
+                    radius: 4
+                    border.color: borderColor
+                    border.width: 1
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            Button {
+                text: "JSON"
+                onClicked: exportDialog.openExport("json")
+                background: Rectangle {
+                    color: parent.pressed ? accentHover : (parent.hovered ? "#4a4a4a" : bgLight)
+                    radius: 4
+                    border.color: borderColor
+                    border.width: 1
+                }
+                contentItem: Text {
+                    text: parent.text
+                    color: textPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
 
             Button {
                 text: "Refresh"
