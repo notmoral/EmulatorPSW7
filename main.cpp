@@ -60,7 +60,7 @@ Dp832Instrument   dp832;
 
     TcpServer   tcpServer(&parser);
     UdpServer   udpServer(&parser);
-    HttpServer  httpServer(&parser);
+    HttpServer  httpServer(&parser, nullptr, "admin", "admin123");
 
 
     qmlRegisterType<TcpClient>("EmulatorPSW7", 1, 0, "TcpClient");
