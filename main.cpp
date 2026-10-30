@@ -71,20 +71,25 @@ Dp832Instrument   dp832;
 
     QQmlApplicationEngine engine;
 
-    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
+    // Если задана переменная окружения HEADLESS, не загружаем GUI
+    if (!qEnvironmentVariableIsSet("HEADLESS")) {
+        const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
 
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreated,
-        &app,
-        [url](QObject *obj, const QUrl &objUrl) {
-            if (!obj && url == objUrl)
-                QCoreApplication::exit(-1);
-        },
-        Qt::QueuedConnection
-        );
+        QObject::connect(
+            &engine,
+            &QQmlApplicationEngine::objectCreated,
+            &app,
+            [url](QObject *obj, const QUrl &objUrl) {
+                if (!obj && url == objUrl)
+                    QCoreApplication::exit(-1);
+            },
+            Qt::QueuedConnection
+            );
 
-    engine.load(url);
+        engine.load(url);
+    } else {
+        qDebug() << "Running in HEADLESS mode (GUI disabled).";
+    }
 
     return app.exec();
 }
