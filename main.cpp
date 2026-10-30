@@ -24,6 +24,8 @@
 #include "src/Psw7Instrument.h"
 #include "src/E36312AInstrument.h"
 #include "src/Dp832Instrument.h"
+#include "src/WebSocketServer.h"
+#include "src/WebSocketClient.h"
 
 int main(int argc, char *argv[])
 {
@@ -62,12 +64,20 @@ Dp832Instrument   dp832;
     UdpServer   udpServer(&parser);
     HttpServer  httpServer(&parser, nullptr, "admin", "admin123");
 
+    // WebSocket-сервер для мгновенных уведомлений в GUI
+    WebSocketServer wsServer;
+    
+    QObject::connect(&tcpServer,  &TcpServer::commandSaved,  &wsServer, &WebSocketServer::notifyClients);
+    QObject::connect(&udpServer,  &UdpServer::commandSaved,  &wsServer, &WebSocketServer::notifyClients);
+    QObject::connect(&httpServer, &HttpServer::commandSaved, &wsServer, &WebSocketServer::notifyClients);
+
 
     qmlRegisterType<TcpClient>("EmulatorPSW7", 1, 0, "TcpClient");
     qmlRegisterType<UdpClient>("EmulatorPSW7", 1, 0, "UdpClient");
     qmlRegisterType<HttpClient>("EmulatorPSW7", 1, 0, "HttpClient");
     qmlRegisterType<HistoryModel>("EmulatorPSW7", 1, 0, "HistoryModel");
     qmlRegisterType<CommandImporter>("EmulatorPSW7", 1, 0, "CommandImporter");
+    qmlRegisterType<WebSocketClient>("EmulatorPSW7", 1, 0, "WebSocketClient");
 
     QQmlApplicationEngine engine;
 

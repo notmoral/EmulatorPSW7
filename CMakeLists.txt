@@ -29,6 +29,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Qml
     QuickControls2
     QuickDialogs2
+    WebSockets      
 )
 
 add_executable(EmulatorPSW7
@@ -39,6 +40,18 @@ add_executable(EmulatorPSW7
 
     src/TcpClient.cpp
     src/TcpClient.h
+
+    src/UdpServer.cpp
+    src/UdpServer.h
+
+    src/UdpClient.cpp
+    src/UdpClient.h
+
+    src/HttpServer.cpp
+    src/HttpServer.h
+
+    src/HttpClient.cpp
+    src/HttpClient.h
 
     src/ScpiParser.cpp
     src/ScpiParser.h
@@ -54,18 +67,23 @@ add_executable(EmulatorPSW7
 
     src/CommandImporter.cpp
     src/CommandImporter.h
-    src/UdpServer.h src/UdpServer.cpp
-    src/UdpClient.h src/UdpClient.cpp
-    src/HttpServer.h src/HttpServer.cpp
-    src/HttpClient.h src/HttpClient.cpp
-    src/IInstrument.h
-    src/Psw7Instrument.h
+
     src/Psw7Instrument.cpp
-    src/E36312AInstrument.h
+    src/Psw7Instrument.h
+
     src/E36312AInstrument.cpp
+    src/E36312AInstrument.h
 
     src/Dp832Instrument.cpp
     src/Dp832Instrument.h
+
+    src/WebSocketServer.cpp
+    src/WebSocketServer.h
+
+    src/WebSocketClient.cpp
+    src/WebSocketClient.h
+
+    src/IInstrument.h
 )
 
 qt_add_resources(EmulatorPSW7
@@ -83,9 +101,9 @@ target_link_libraries(EmulatorPSW7 PRIVATE
     Qt${QT_VERSION_MAJOR}::Qml
     Qt${QT_VERSION_MAJOR}::QuickControls2
     Qt${QT_VERSION_MAJOR}::QuickDialogs2
+    Qt${QT_VERSION_MAJOR}::WebSockets
 )
 
-# PowerSupply unit tests
 add_executable(EmulatorPSW7Tests
     tests/tst_PowerSupply.cpp
     src/PowerSupply.cpp
