@@ -189,6 +189,7 @@ void HttpServer::handleRequest(QTcpSocket* socket, const QByteArray& request)
     const QString response = parser->parse(device, cmd);
     const QString instrumentName = parser->displayName(device);
     m_database.save_command(device, instrumentName, "HTTP", cmd, response);
+    emit commandSaved();
 
     QJsonObject obj;
     obj["device"]   = device;

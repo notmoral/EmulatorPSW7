@@ -41,6 +41,10 @@ public:
      */
     TcpServer(ScpiParser* sp, QObject* parent = nullptr);
 
+signals:
+    /// Испускается после успешного сохранения команды в БД.
+    void commandSaved();
+
 private slots:
     /// Обрабатывает новое TCP-подключение.
     void onNewConnection();
@@ -49,4 +53,4 @@ private slots:
     void onReadyRead();
 };
 
-#endif
+#endif // TCPSERVER_H

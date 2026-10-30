@@ -51,6 +51,7 @@ void UdpServer::onReadyRead()
 
         const QString instrumentName = parser->displayName(device);
         m_database.save_command(device, instrumentName, "UDP", command, response);
+    	emit commandSaved();
 
         const QByteArray responseData = response.toUtf8() + '\n';
         m_socket->writeDatagram(responseData, sender, senderPort);

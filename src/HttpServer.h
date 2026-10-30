@@ -45,6 +45,11 @@ public:
                const QString& login = QString(),
                const QString& password = QString());
 
+signals:
+    /// Испускается после успешного сохранения команды в БД.
+    void commandSaved();
+
+
 private slots:
     void onNewConnection();
     void onReadyRead();
