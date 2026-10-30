@@ -23,6 +23,7 @@
 #include "src/CommandImporter.h"
 #include "src/Psw7Instrument.h"
 #include "src/E36312AInstrument.h"
+#include "src/Dp832Instrument.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,6 +33,7 @@ int main(int argc, char *argv[])
 
     Psw7Instrument   psw7;
     E36312AInstrument e36312a;
+Dp832Instrument   dp832;
     ScpiParser       parser;
 
     // Вывод доступных IP-адресов для удаленного подключения.
@@ -54,10 +56,12 @@ int main(int argc, char *argv[])
 
     parser.registerInstrument(&psw7);
     parser.registerInstrument(&e36312a);
+    parser.registerInstrument(&dp832);
 
     TcpServer   tcpServer(&parser);
     UdpServer   udpServer(&parser);
-    HttpServer  httpServer(&parser);
+    HttpServer  httpServer(&parser, nullptr, "admin", "admin123");
+
 
     qmlRegisterType<TcpClient>("EmulatorPSW7", 1, 0, "TcpClient");
     qmlRegisterType<UdpClient>("EmulatorPSW7", 1, 0, "UdpClient");
@@ -67,20 +71,25 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
+    // Если задана переменная окружения HEADLESS, не загружаем GUI
+    if (!qEnvironmentVariableIsSet("HEADLESS")) {
+        const QUrl url(QStringLiteral("qrc:/qml/Main.qml"));
 
-    QObject::connect(
-        &engine,
-        &QQmlApplicationEngine::objectCreated,
-        &app,
-        [url](QObject *obj, const QUrl &objUrl) {
-            if (!obj && url == objUrl)
-                QCoreApplication::exit(-1);
-        },
-        Qt::QueuedConnection
-        );
+        QObject::connect(
+            &engine,
+            &QQmlApplicationEngine::objectCreated,
+            &app,
+            [url](QObject *obj, const QUrl &objUrl) {
+                if (!obj && url == objUrl)
+                    QCoreApplication::exit(-1);
+            },
+            Qt::QueuedConnection
+            );
 
-    engine.load(url);
+        engine.load(url);
+    } else {
+        qDebug() << "Running in HEADLESS mode (GUI disabled).";
+    }
 
     return app.exec();
 }

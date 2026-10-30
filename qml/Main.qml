@@ -243,7 +243,7 @@ ApplicationWindow {
             ComboBox {
                 id: deviceSelector
                 Layout.preferredWidth: 130
-                model: ["PSW7", "E36312A"]
+                model: ["PSW7", "E36312A", "DP832"]
                 currentIndex: 0
             }
 
