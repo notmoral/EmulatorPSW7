@@ -76,7 +76,14 @@ void HttpClient::sendCommand(const QString& command)
         query.addQueryItem("device", device);
     url.setQuery(query);
 
-    QNetworkReply* reply = m_manager.get(QNetworkRequest(url));
+    QNetworkRequest request(url);
+    if (!m_login.isEmpty()) {
+        const QString pair = m_login + ":" + m_password;
+        request.setRawHeader("Authorization",
+                             "Basic " + pair.toUtf8().toBase64());
+    }
+
+    QNetworkReply* reply = m_manager.get(request);
 
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         reply->deleteLater();
@@ -97,4 +104,10 @@ void HttpClient::sendCommand(const QString& command)
             emit responseReceived(QString::fromUtf8(data).trimmed());
         }
     });
+}
+
+void HttpClient::setCredentials(const QString& login, const QString& password)
+{
+    m_login    = login;
+    m_password = password;
 }

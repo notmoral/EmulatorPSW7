@@ -34,6 +34,7 @@ bool CommandImporter::createClient(const QString& protocol)
         m_client = new UdpClient(this);
     } else if (p == "HTTP") {
         m_client = new HttpClient(this);
+        static_cast<HttpClient*>(m_client)->setCredentials("admin", "admin123");
     } else {
         emit importError("Неизвестный протокол: " + protocol);
         return false;
