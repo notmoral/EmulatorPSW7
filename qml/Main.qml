@@ -99,11 +99,20 @@ ApplicationWindow {
         id: historyModel
     }
 
+    WebSocketClient {
+        id: wsClient
+        Component.onCompleted: connectToServer("ws://127.0.0.1:8081")
+
+        onReloadRequested: {
+            historyModel.reload()
+        }
+    }
+
     Timer {
         id: autoRefreshTimer
         interval: 2000
         running: autoRefreshSwitch.checked
-        repeat: true
+        repeat: false
 
         onTriggered: {
             historyModel.reload()

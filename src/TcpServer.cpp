@@ -50,4 +50,5 @@ void TcpServer::onReadyRead() {
 
     const QString instrumentName = parser->displayName(device);
     m_database.save_command(device, instrumentName, "TCP", command, response);
+    emit commandSaved();
 }

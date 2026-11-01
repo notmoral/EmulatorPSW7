@@ -35,6 +35,11 @@ public:
      */
     UdpServer(ScpiParser* sp, QObject* parent = nullptr);
 
+signals:
+    /// Испускается после успешного сохранения команды в БД.
+    void commandSaved();
+
+
 private slots:
     /// Читает все поступившие датаграммы и обрабатывает их.
     void onReadyRead();
