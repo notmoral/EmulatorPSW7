@@ -18,8 +18,7 @@ TcpServer::TcpServer(ScpiParser* sp, QObject* parent)
         qDebug() << "TCP server started on 0.0.0.0:5025 (all interfaces)";
     }
     else {
-        qDebug() << "Failed to start server: " <<
-            m_server->errorString().toStdString();
+	qDebug() << "Failed to start server: " << m_server->errorString();
     }
 }
 
