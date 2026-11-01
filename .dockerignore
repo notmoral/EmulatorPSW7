@@ -2,4 +2,8 @@ build/
 .git/
 docs/
 *.user
+<<<<<<< HEAD
 *.db
+=======
+*.db
+>>>>>>> origin/main
