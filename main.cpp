@@ -33,10 +33,10 @@ int main(int argc, char *argv[])
 
     QQuickStyle::setStyle("Fusion");
 
-    Psw7Instrument   psw7;
+    Psw7Instrument    psw7;
     E36312AInstrument e36312a;
-Dp832Instrument   dp832;
-    ScpiParser       parser;
+    Dp832Instrument   dp832;
+    ScpiParser        parser;
 
     // Вывод доступных IP-адресов для удаленного подключения.
     qDebug() << "--------------------------------------------------";
@@ -66,11 +66,9 @@ Dp832Instrument   dp832;
 
     // WebSocket-сервер для мгновенных уведомлений в GUI
     WebSocketServer wsServer;
-    
     QObject::connect(&tcpServer,  &TcpServer::commandSaved,  &wsServer, &WebSocketServer::notifyClients);
     QObject::connect(&udpServer,  &UdpServer::commandSaved,  &wsServer, &WebSocketServer::notifyClients);
     QObject::connect(&httpServer, &HttpServer::commandSaved, &wsServer, &WebSocketServer::notifyClients);
-
 
     qmlRegisterType<TcpClient>("EmulatorPSW7", 1, 0, "TcpClient");
     qmlRegisterType<UdpClient>("EmulatorPSW7", 1, 0, "UdpClient");
@@ -100,3 +98,6 @@ Dp832Instrument   dp832;
     } else {
         qDebug() << "Running in HEADLESS mode (GUI disabled).";
     }
+
+    return app.exec();
+}
