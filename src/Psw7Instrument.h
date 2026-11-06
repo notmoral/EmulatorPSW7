@@ -27,6 +27,8 @@ public:
 
 private:
     PowerSupply m_powerSupply;  ///< Модель напряжения и лимита.
+    bool m_ovpEnabled = false; ///< Флаг включения защиты от перенапряжения.
+    bool m_ovpTripped = false; ///< Флаг срабатывания защиты.
 };
 
 #endif // PSW7INSTRUMENT_H

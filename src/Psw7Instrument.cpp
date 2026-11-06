@@ -37,25 +37,43 @@ QString Psw7Instrument::handleCommand(const QString& command)
 {
     QStringList parts = command.split(' ');
 
-    if (command == "*IDN?") {
-        return identify();
+    if (command == "*IDN?") return identify();
+    if (command == "*OPC?") return "1";
+    if (command == "SYSTem:ERRor?") return popError();
+
+    // --- Защита от перенапряжения (OVP) ---
+    if (parts.size() == 2 && parts[0] == "VOLTage:PROTection:STATe") {
+        const QString arg = parts[1].toUpper();
+        if (arg == "ON" || arg == "1") m_ovpEnabled = true;
+        else if (arg == "OFF" || arg == "0") m_ovpEnabled = false;
+        else m_errorQueue.enqueue("-224, Illegal parameter value");
+        return "";
     }
-    else if (command == "*OPC?") {
-        return "1";
+    if (command == "VOLTage:PROTection:STATe?") {
+        return m_ovpEnabled ? "1" : "0";
     }
-    else if (command == "SYSTem:ERRor?") {
-        return popError();
+    if (command == "VOLTage:PROTection:TRIPped?") {
+        return m_ovpTripped ? "1" : "0";
     }
-    else if (command == "MEASure:VOLTage:DC?") {
+
+    // --- Измерения и лимиты ---
+    if (command == "MEASure:VOLTage:DC?") {
         return QString::number(m_powerSupply.get_voltage());
     }
     else if (parts.size() == 2 && parts[0] == "SOURce:VOLTage:LIMit") {
         bool ok;
         float value = parts[1].toFloat(&ok);
         if (ok) {
-            m_powerSupply.set_voltage_limit(value);
+            // Проверка срабатывания OVP (максимум 12 В для PSW7)
+            if (m_ovpEnabled && value > 12.0f) {
+                m_ovpTripped = true;
+                m_powerSupply.set_voltage_limit(0.0f); // Сбрасываем напряжение
+                m_errorQueue.enqueue("-222, Data out of range (OVP triggered)");
+            } else {
+                m_ovpTripped = false; // Сбрасываем флаг, если значение в норме
+                m_powerSupply.set_voltage_limit(value);
+            }
         } else {
-            // Ошибка: неверный тип данных
             m_errorQueue.enqueue("-104, Data type error");
         }
         return "";
@@ -64,10 +82,7 @@ QString Psw7Instrument::handleCommand(const QString& command)
         return QString::number(m_powerSupply.get_voltage_limit(), 'f', 3);
     }
 
-    // Если команда не распознана (дошли до сюда)
-    if (!command.isEmpty() && command != "SOURce:VOLTage:LIMit") {
-        m_errorQueue.enqueue("-113, Undefined header");
-    }
-
+    // Если команда не распознана
+    m_errorQueue.enqueue("-113, Undefined header");
     return "";
 }
