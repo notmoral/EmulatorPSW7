@@ -56,10 +56,15 @@ QString Psw7Instrument::handleCommand(const QString& command)
         return m_ovpTripped ? "1" : "0";
     }
 
-    // --- Измерения и лимиты ---
+    // --- Измерения ---
     if (command == "MEASure:VOLTage:DC?") {
         return QString::number(m_powerSupply.get_voltage());
     }
+    else if (command == "MEASure:CURRent:DC?") {
+        return QString::number(m_powerSupply.get_current());
+    }
+    
+    // --- Лимит напряжения ---
     else if (parts.size() == 2 && parts[0] == "SOURce:VOLTage:LIMit") {
         bool ok;
         float value = parts[1].toFloat(&ok);
@@ -80,6 +85,36 @@ QString Psw7Instrument::handleCommand(const QString& command)
     }
     else if (command == "SOURce:VOLTage:LIMit?") {
         return QString::number(m_powerSupply.get_voltage_limit(), 'f', 3);
+    }
+
+    // --- Лимит тока ---
+    else if (parts.size() == 2 && parts[0] == "SOURce:CURRent:LIMit") {
+        bool ok;
+        float value = parts[1].toFloat(&ok);
+        if (ok) {
+            m_powerSupply.set_current_limit(value);
+        } else {
+            m_errorQueue.enqueue("-104, Data type error");
+        }
+        return "";
+    }
+    else if (command == "SOURce:CURRent:LIMit?") {
+        return QString::number(m_powerSupply.get_current_limit(), 'f', 3);
+    }
+
+    // --- Сопротивление нагрузки (кастомная команда для тестов) ---
+    else if (parts.size() == 2 && parts[0] == "SYSTem:LOAD") {
+        bool ok;
+        float value = parts[1].toFloat(&ok);
+        if (ok) {
+            m_powerSupply.set_load_resistance(value);
+        } else {
+            m_errorQueue.enqueue("-104, Data type error");
+        }
+        return "";
+    }
+    else if (command == "SYSTem:LOAD?") {
+        return QString::number(m_powerSupply.get_load_resistance(), 'f', 3);
     }
 
     // Если команда не распознана
