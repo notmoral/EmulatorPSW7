@@ -26,6 +26,8 @@ public:
     QString popError() override;
 
 private:
+    bool m_ocpEnabled = false; ///< Флаг включения защиты от перегрузки по току.
+    bool m_ocpTripped = false; ///< Флаг срабатывания OCP.
     PowerSupply m_powerSupply;  ///< Модель напряжения и лимита.
     bool m_ovpEnabled = false; ///< Флаг включения защиты от перенапряжения.
     bool m_ovpTripped = false; ///< Флаг срабатывания защиты.
