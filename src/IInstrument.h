@@ -7,6 +7,7 @@
 #define IINSTRUMENT_H
 
 #include <QString>
+#include <QQueue>
 
 /**
  * @brief Интерфейс прибора, поддерживающего SCPI.
@@ -35,6 +36,16 @@ public:
      *         или не предполагает ответа.
      */
     virtual QString handleCommand(const QString& command) = 0;
+
+    /**
+     * @brief Извлекает и удаляет последнюю ошибку из очереди.
+     * @return Код ошибки и её описание в формате SCPI (например, "-222, Data out of range").
+     *         Если очередь пуста, возвращает "0, No error".
+     */
+    virtual QString popError() = 0;
+
+protected:
+    QQueue<QString> m_errorQueue; ///< Очередь системных ошибок.
 };
 
 #endif // IINSTRUMENT_H
