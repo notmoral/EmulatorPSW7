@@ -88,3 +88,9 @@ void PowerSupply::set_load_resistance(float resistance) {
 float PowerSupply::get_load_resistance() const {
     return load_resistance;
 }
+
+bool PowerSupply::is_overcurrent() {
+    if (load_resistance <= 0.0f) return true;
+    float theoretical_current = voltage_limit / load_resistance;
+    return theoretical_current > current_limit;
+}

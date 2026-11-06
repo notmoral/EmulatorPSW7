@@ -56,8 +56,30 @@ QString Psw7Instrument::handleCommand(const QString& command)
         return m_ovpTripped ? "1" : "0";
     }
 
+    // --- Защита от перегрузки по току (OCP) ---
+    if (parts.size() == 2 && parts[0] == "CURRent:PROTection:STATe") {
+        const QString arg = parts[1].toUpper();
+        if (arg == "ON" || arg == "1") m_ocpEnabled = true;
+        else if (arg == "OFF" || arg == "0") m_ocpEnabled = false;
+        else m_errorQueue.enqueue("-224, Illegal parameter value");
+        return "";
+    }
+    if (command == "CURRent:PROTection:STATe?") {
+        return m_ocpEnabled ? "1" : "0";
+    }
+    if (command == "CURRent:PROTection:TRIPped?") {
+        return m_ocpTripped ? "1" : "0";
+    }
+
     // --- Измерения ---
     if (command == "MEASure:VOLTage:DC?") {
+        // Проверка OCP перед выдачей показаний
+        if (m_ocpEnabled && m_powerSupply.is_overcurrent()) {
+            m_ocpTripped = true;
+            m_powerSupply.set_voltage_limit(0.0f); // Отключаем выход
+            m_errorQueue.enqueue("-222, Data out of range (OCP triggered)");
+            return "0.000";
+        }
         return QString::number(m_powerSupply.get_voltage());
     }
     else if (command == "MEASure:CURRent:DC?") {
