@@ -29,8 +29,14 @@ float PowerSupply::get_voltage() {
         actual_voltage = current_limit * load_resistance;
     }
 
+    // Добавляем небольшую погрешность измерения (шум)
     float noise = get_random_float_3dp(-0.05f, 0.05f);
     actual_voltage += noise;
+
+    // Не даем шуму вывести напряжение за установленный лимит
+    if (actual_voltage > voltage_limit) {
+        actual_voltage = voltage_limit;
+    }
 
     return (actual_voltage < 0.0f) ? 0.0f : std::round(actual_voltage * 1000.0f) / 1000.0f;
 }
