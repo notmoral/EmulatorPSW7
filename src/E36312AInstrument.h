@@ -36,6 +36,9 @@ public:
     QString popError() override;
 
 private:
+
+    bool    m_ovpEnabled = false; ///< Флаг включения защиты от перенапряжения.
+    bool    m_ovpTripped = false; ///< Флаг срабатывания защиты.
     /// Состояние одного канала.
     struct Channel {
         float voltageLimit = 5.0f;  ///< Лимит напряжения, В.

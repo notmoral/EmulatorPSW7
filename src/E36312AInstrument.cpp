@@ -60,8 +60,28 @@ QString E36312AInstrument::handleCommand(const QString& command)
 
     if (clean == "*IDN?") return identify();
     if (clean == "*OPC?")  return "1";
-    if (clean == "SYSTem:ERRor?") return popError(); // <-- ДОБАВЛЕНО
+    if (clean == "SYSTem:ERRor?") return popError();
 
+    // --- Защита от перенапряжения (OVP) ---
+    if (clean.startsWith("VOLTage:PROTection:STATe")) {
+        const QStringList parts = clean.split(' ', Qt::SkipEmptyParts);
+        if (parts.size() == 2) {
+            const QString arg = parts[1].toUpper();
+            if (arg == "ON" || arg == "1") m_ovpEnabled = true;
+            else if (arg == "OFF" || arg == "0") m_ovpEnabled = false;
+            else m_errorQueue.enqueue("-224, Illegal parameter value");
+            return "";
+        }
+        return "";
+    }
+    if (clean == "VOLTage:PROTection:STATe?") {
+        return m_ovpEnabled ? "1" : "0";
+    }
+    if (clean == "VOLTage:PROTection:TRIPped?") {
+        return m_ovpTripped ? "1" : "0";
+    }
+
+    // --- Выбор канала ---
     if (clean == "INSTrument:NSELect?")
         return QString::number(m_selectedChannel + 1);
 
@@ -71,7 +91,7 @@ QString E36312AInstrument::handleCommand(const QString& command)
         if (ok && validChannel(ch - 1)) {
             m_selectedChannel = ch - 1;
         } else {
-            m_errorQueue.enqueue("-222, Data out of range"); // <-- ОШИБКА
+            m_errorQueue.enqueue("-222, Data out of range");
         }
         return "";
     }
@@ -82,7 +102,7 @@ QString E36312AInstrument::handleCommand(const QString& command)
 
     const QRegularExpressionMatch match = re.match(clean);
     if (!match.hasMatch()) {
-        m_errorQueue.enqueue("-113, Undefined header"); // <-- ОШИБКА
+        m_errorQueue.enqueue("-113, Undefined header");
         return "";
     }
 
@@ -96,7 +116,7 @@ QString E36312AInstrument::handleCommand(const QString& command)
         const int ch = chStr.toInt();
         if (validChannel(ch - 1)) channel = ch - 1;
         else {
-            m_errorQueue.enqueue("-222, Data out of range"); // <-- ОШИБКА
+            m_errorQueue.enqueue("-222, Data out of range");
             return "";
         }
     }
@@ -110,7 +130,7 @@ QString E36312AInstrument::handleCommand(const QString& command)
             const QString a = arg.toUpper();
             if (a == "ON"  || a == "1") m_channels[channel].outputOn = true;
             else if (a == "OFF" || a == "0") m_channels[channel].outputOn = false;
-            else m_errorQueue.enqueue("-224, Illegal parameter value"); // <-- ОШИБКА
+            else m_errorQueue.enqueue("-224, Illegal parameter value");
             return "";
         }
     }
@@ -123,8 +143,21 @@ QString E36312AInstrument::handleCommand(const QString& command)
         if (tail == ":VOLTage:LIMit") {
             bool ok;
             const float v = arg.toFloat(&ok);
-            if (ok) m_channels[channel].voltageLimit = (v < 0) ? 0.0f : v;
-            else m_errorQueue.enqueue("-104, Data type error"); // <-- ОШИБКА
+            if (ok) {
+                // Определяем максимальное напряжение для канала (6В для 1-го, 25В для остальных)
+                float maxVoltage = (channel == 0) ? 6.0f : 25.0f;
+                
+                if (m_ovpEnabled && v > maxVoltage) {
+                    m_ovpTripped = true;
+                    m_channels[channel].voltageLimit = 0.0f; // Сбрасываем напряжение
+                    m_errorQueue.enqueue("-222, Data out of range (OVP triggered)");
+                } else {
+                    m_ovpTripped = false;
+                    m_channels[channel].voltageLimit = (v < 0) ? 0.0f : v;
+                }
+            } else {
+                m_errorQueue.enqueue("-104, Data type error");
+            }
             return "";
         }
         if (tail == ":CURRent:LIMit?") {
@@ -134,7 +167,7 @@ QString E36312AInstrument::handleCommand(const QString& command)
             bool ok;
             const float v = arg.toFloat(&ok);
             if (ok) m_channels[channel].currentLimit = (v < 0) ? 0.0f : v;
-            else m_errorQueue.enqueue("-104, Data type error"); // <-- ОШИБКА
+            else m_errorQueue.enqueue("-104, Data type error");
             return "";
         }
     }
@@ -151,6 +184,6 @@ QString E36312AInstrument::handleCommand(const QString& command)
         }
     }
 
-    m_errorQueue.enqueue("-113, Undefined header"); // <-- ОШИБКА (если дошли до сюда)
+    m_errorQueue.enqueue("-113, Undefined header");
     return "";
 }
