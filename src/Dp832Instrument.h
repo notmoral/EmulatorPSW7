@@ -47,6 +47,9 @@ private:
 
     static float randomValue(float min, float max);
     static bool validChannel(int index);
+
+    bool m_ovpEnabled = false; ///< Флаг включения защиты от перенапряжения.
+    bool m_ovpTripped = false; ///< Флаг срабатывания защиты.
 };
 
 #endif // DP832INSTRUMENT_H

@@ -61,7 +61,26 @@ QString Dp832Instrument::handleCommand(const QString& command)
 
     if (clean == "*IDN?") return identify();
     if (clean == "*OPC?")  return "1";
-    if (clean == "SYSTem:ERRor?") return popError(); // <-- ДОБАВЛЕНО
+    if (clean == "SYSTem:ERRor?") return popError();
+
+    // --- Защита от перенапряжения (OVP) ---
+    if (clean.startsWith("VOLTage:PROTection:STATe")) {
+        const QStringList parts = clean.split(' ', Qt::SkipEmptyParts);
+        if (parts.size() == 2) {
+            const QString arg = parts[1].toUpper();
+            if (arg == "ON" || arg == "1") m_ovpEnabled = true;
+            else if (arg == "OFF" || arg == "0") m_ovpEnabled = false;
+            else m_errorQueue.enqueue("-224, Illegal parameter value");
+            return "";
+        }
+        return "";
+    }
+    if (clean == "VOLTage:PROTection:STATe?") {
+        return m_ovpEnabled ? "1" : "0";
+    }
+    if (clean == "VOLTage:PROTection:TRIPped?") {
+        return m_ovpTripped ? "1" : "0";
+    }
 
     static const QRegularExpression re(
         R"(^:?(OUTPut|SOURce|MEASure)(\d)?(:[A-Za-z]+)(\??)(?:\s+(.+))?$)"
@@ -69,7 +88,7 @@ QString Dp832Instrument::handleCommand(const QString& command)
 
     const QRegularExpressionMatch match = re.match(clean);
     if (!match.hasMatch()) {
-        m_errorQueue.enqueue("-113, Undefined header"); // <-- ОШИБКА
+        m_errorQueue.enqueue("-113, Undefined header");
         return "";
     }
 
@@ -84,7 +103,7 @@ QString Dp832Instrument::handleCommand(const QString& command)
         const int ch = chStr.toInt();
         if (validChannel(ch - 1)) channel = ch - 1;
         else {
-            m_errorQueue.enqueue("-222, Data out of range"); // <-- ОШИБКА
+            m_errorQueue.enqueue("-222, Data out of range");
             return "";
         }
     }
@@ -96,7 +115,7 @@ QString Dp832Instrument::handleCommand(const QString& command)
             channel = ch - 1;
             value.clear();
         } else {
-            m_errorQueue.enqueue("-222, Data out of range"); // <-- ОШИБКА
+            m_errorQueue.enqueue("-222, Data out of range");
             return "";
         }
     }
@@ -109,7 +128,7 @@ QString Dp832Instrument::handleCommand(const QString& command)
         const QString up = value.toUpper();
         if (up == "ON"  || up == "1") m_channels[channel].outputOn = true;
         else if (up == "OFF" || up == "0") m_channels[channel].outputOn = false;
-        else m_errorQueue.enqueue("-224, Illegal parameter value"); // <-- ОШИБКА
+        else m_errorQueue.enqueue("-224, Illegal parameter value");
         return "";
     }
 
@@ -119,8 +138,21 @@ QString Dp832Instrument::handleCommand(const QString& command)
             if (isQuery) return QString::number(m_channels[channel].voltageLimit, 'f', 3);
             bool ok;
             const float v = value.toFloat(&ok);
-            if (ok) m_channels[channel].voltageLimit = (v < 0) ? 0.0f : v;
-            else m_errorQueue.enqueue("-104, Data type error"); // <-- ОШИБКА
+            if (ok) {
+                // Максимальное напряжение: 5В для 3-го канала, 30В для остальных
+                float maxVoltage = (channel == 2) ? 5.0f : 30.0f;
+                
+                if (m_ovpEnabled && v > maxVoltage) {
+                    m_ovpTripped = true;
+                    m_channels[channel].voltageLimit = 0.0f; // Сбрасываем
+                    m_errorQueue.enqueue("-222, Data out of range (OVP triggered)");
+                } else {
+                    m_ovpTripped = false;
+                    m_channels[channel].voltageLimit = (v < 0) ? 0.0f : v;
+                }
+            } else {
+                m_errorQueue.enqueue("-104, Data type error");
+            }
             return "";
         }
         if (tail == ":CURRent") {
@@ -128,7 +160,7 @@ QString Dp832Instrument::handleCommand(const QString& command)
             bool ok;
             const float v = value.toFloat(&ok);
             if (ok) m_channels[channel].currentLimit = (v < 0) ? 0.0f : v;
-            else m_errorQueue.enqueue("-104, Data type error"); // <-- ОШИБКА
+            else m_errorQueue.enqueue("-104, Data type error");
             return "";
         }
     }
@@ -145,6 +177,6 @@ QString Dp832Instrument::handleCommand(const QString& command)
         }
     }
 
-    m_errorQueue.enqueue("-113, Undefined header"); // <-- ОШИБКА
+    m_errorQueue.enqueue("-113, Undefined header");
     return "";
 }
