@@ -46,45 +46,59 @@ bool E36312AInstrument::validChannel(int index)
     return index >= 0 && index < 3;
 }
 
+QString E36312AInstrument::popError()
+{
+    if (m_errorQueue.isEmpty()) {
+        return "0, No error";
+    }
+    return m_errorQueue.dequeue();
+}
+
 QString E36312AInstrument::handleCommand(const QString& command)
 {
     const QString clean = command.trimmed();
 
     if (clean == "*IDN?") return identify();
     if (clean == "*OPC?")  return "1";
+    if (clean == "SYSTem:ERRor?") return popError(); // <-- ДОБАВЛЕНО
 
-    // Разбор: команда [номер_канала] : tail [аргумент]
-    // Пример: "SOURce2:VOLTage:LIMit 20"
-    //  - head = "SOURce", channel = 2, tail = ":VOLTage:LIMit", arg = "20"
-    // Если номера нет — используется m_selectedChannel.
-    static const QRegularExpression re(
-        R"(^(OUTPut|SOURce|MEASure)(\d)?(:[^\s]+)(?:\s+(.*))?$)"
-    );
-
-    // INSTrument:NSELect <n> / ?
     if (clean == "INSTrument:NSELect?")
         return QString::number(m_selectedChannel + 1);
 
     if (clean.startsWith("INSTrument:NSELect ")) {
         bool ok;
         const int ch = clean.mid(QString("INSTrument:NSELect ").size()).trimmed().toInt(&ok);
-        if (ok && validChannel(ch - 1)) m_selectedChannel = ch - 1;
+        if (ok && validChannel(ch - 1)) {
+            m_selectedChannel = ch - 1;
+        } else {
+            m_errorQueue.enqueue("-222, Data out of range"); // <-- ОШИБКА
+        }
         return "";
     }
 
-    const QRegularExpressionMatch match = re.match(clean);
-    if (!match.hasMatch()) return "";
+    static const QRegularExpression re(
+        R"(^(OUTPut|SOURce|MEASure)(\d)?(:[^\s]+)(?:\s+(.*))?$)"
+    );
 
-    const QString head    = match.captured(1);      // "OUTPut" / "SOURce" / "MEASure"
-    const QString chStr   = match.captured(2);      // "1".."3" или пусто
-    const QString tail    = match.captured(3);      // ":STATe" / ":VOLTage:LIMit?"
+    const QRegularExpressionMatch match = re.match(clean);
+    if (!match.hasMatch()) {
+        m_errorQueue.enqueue("-113, Undefined header"); // <-- ОШИБКА
+        return "";
+    }
+
+    const QString head    = match.captured(1);
+    const QString chStr   = match.captured(2);
+    const QString tail    = match.captured(3);
     const QString arg     = match.captured(4).trimmed();
 
     int channel = m_selectedChannel;
     if (!chStr.isEmpty()) {
         const int ch = chStr.toInt();
         if (validChannel(ch - 1)) channel = ch - 1;
-        else return "";
+        else {
+            m_errorQueue.enqueue("-222, Data out of range"); // <-- ОШИБКА
+            return "";
+        }
     }
 
     // --- OUTPut:STATe ---
@@ -95,7 +109,8 @@ QString E36312AInstrument::handleCommand(const QString& command)
         if (tail == ":STATe") {
             const QString a = arg.toUpper();
             if (a == "ON"  || a == "1") m_channels[channel].outputOn = true;
-            if (a == "OFF" || a == "0") m_channels[channel].outputOn = false;
+            else if (a == "OFF" || a == "0") m_channels[channel].outputOn = false;
+            else m_errorQueue.enqueue("-224, Illegal parameter value"); // <-- ОШИБКА
             return "";
         }
     }
@@ -109,6 +124,7 @@ QString E36312AInstrument::handleCommand(const QString& command)
             bool ok;
             const float v = arg.toFloat(&ok);
             if (ok) m_channels[channel].voltageLimit = (v < 0) ? 0.0f : v;
+            else m_errorQueue.enqueue("-104, Data type error"); // <-- ОШИБКА
             return "";
         }
         if (tail == ":CURRent:LIMit?") {
@@ -118,6 +134,7 @@ QString E36312AInstrument::handleCommand(const QString& command)
             bool ok;
             const float v = arg.toFloat(&ok);
             if (ok) m_channels[channel].currentLimit = (v < 0) ? 0.0f : v;
+            else m_errorQueue.enqueue("-104, Data type error"); // <-- ОШИБКА
             return "";
         }
     }
@@ -126,17 +143,14 @@ QString E36312AInstrument::handleCommand(const QString& command)
     if (head == "MEASure") {
         if (tail == ":VOLTage:DC?") {
             if (!m_channels[channel].outputOn) return QString::number(0.0f, 'f', 3);
-            return QString::number(
-                m_channels[channel].voltageLimit - randomValue(0.0f, 0.1f),
-                'f', 3);
+            return QString::number(m_channels[channel].voltageLimit - randomValue(0.0f, 0.1f), 'f', 3);
         }
         if (tail == ":CURRent:DC?") {
             if (!m_channels[channel].outputOn) return QString::number(0.0f, 'f', 3);
-            return QString::number(
-                m_channels[channel].currentLimit - randomValue(0.0f, 0.05f),
-                'f', 3);
+            return QString::number(m_channels[channel].currentLimit - randomValue(0.0f, 0.05f), 'f', 3);
         }
     }
 
+    m_errorQueue.enqueue("-113, Undefined header"); // <-- ОШИБКА (если дошли до сюда)
     return "";
 }

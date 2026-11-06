@@ -23,6 +23,7 @@ public:
     QString displayName() const override;
     QString identify() const override;
     QString handleCommand(const QString& command) override;
+    QString popError() override;
 
 private:
     PowerSupply m_powerSupply;  ///< Модель напряжения и лимита.
