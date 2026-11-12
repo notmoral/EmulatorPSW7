@@ -33,8 +33,12 @@ public:
     QString displayName() const override;
     QString identify() const override;
     QString handleCommand(const QString& command) override;
+    QString popError() override;
 
 private:
+
+    bool    m_ovpEnabled = false; ///< Флаг включения защиты от перенапряжения.
+    bool    m_ovpTripped = false; ///< Флаг срабатывания защиты.
     /// Состояние одного канала.
     struct Channel {
         float voltageLimit = 5.0f;  ///< Лимит напряжения, В.

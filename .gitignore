@@ -7,6 +7,9 @@ emulator.db
 docs/
 Doxyfile.bak
 
+portable/
+*.zip
+
 
 build/
 *.user
