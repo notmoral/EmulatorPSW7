@@ -78,6 +78,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<WebSocketClient>("EmulatorPSW7", 1, 0, "WebSocketClient");
 
     QQmlApplicationEngine engine;
+    engine.addImportPath("qml");
+    engine.addImportPath(".");
 
     // Если задана переменная окружения HEADLESS, не загружаем GUI
     if (!qEnvironmentVariableIsSet("HEADLESS")) {
